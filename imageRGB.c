@@ -16,7 +16,7 @@
 // NMec:
 // Name:
 //
-// Date:
+// Date: 17/11/2025
 //
 
 #include "imageRGB.h"
@@ -51,7 +51,7 @@
 struct image {
   uint32 width;
   uint32 height;
-  uint16** image;  // pointer to an array of pointers referencing the image rows
+  uint16** image;     // pointer to an array of pointers referencing the image rows
   uint16 num_colors;  // the number of colors (i.e., pixel labels) used
   rgb_t* LUT;         // table storing (R,G,B) triplets
 };
@@ -284,10 +284,22 @@ void ImageDestroy(Image* imgp) {
 Image ImageCopy(const Image img) {
   assert(img != NULL);
 
-  // TO BE COMPLETED
-  // ...
+  // Allocate header of new image in order to create it with the same size
+  Image newImg = AllocateImageHeader(img->width, img->height);
 
-  return NULL;
+  // Copy number of colors
+  newImg->num_colors = img->num_colors;
+
+  // Copy LUT from original image to new image
+  memcpy(newImg->LUT, img->LUT, img->num_colors * sizeof(rgb_t));
+
+  // Allocate and copy each row of the image
+  for (uint32 i = 0; i < img->height; i++) {
+    newImg->image[i] = AllocateRowArray(img->width);
+    memcpy(newImg->image[i], img->image[i], img->width * sizeof(uint16));
+  }
+
+  return newImg;
 }
 
 /// Printing on the console
@@ -552,7 +564,7 @@ uint16 ImageColors(const Image img) {
 /// Check if img1 and img2 represent equal images.
 /// NOTE: The same rgb color may correspond to different LUT labels in
 /// different images!
-int ImageIsEqual(const Image img1, const Image img2) {
+int ImageIsEqual(const Image img1, const Image img2) {              //completar
   assert(img1 != NULL);
   assert(img2 != NULL);
 
@@ -583,7 +595,7 @@ int ImageIsDifferent(const Image img1, const Image img2) {
 ///
 /// On success, a new image is returned.
 /// (The caller is responsible for destroying the returned image!)
-Image ImageRotate90CW(const Image img) {
+Image ImageRotate90CW(const Image img) {                            //completar
   assert(img != NULL);
 
   // TO BE COMPLETED
@@ -598,7 +610,7 @@ Image ImageRotate90CW(const Image img) {
 ///
 /// On success, a new image is returned.
 /// (The caller is responsible for destroying the returned image!)
-Image ImageRotate180CW(const Image img) {
+Image ImageRotate180CW(const Image img) {                           //completar
   assert(img != NULL);
 
   // TO BE COMPLETED
