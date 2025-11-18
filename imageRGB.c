@@ -284,17 +284,15 @@ void ImageDestroy(Image* imgp) {
 Image ImageCopy(const Image img) {
   assert(img != NULL);
 
-  // TO BE COMPLETED
-  // ...
-
-  // Criar uma imagem com as mesmas dimenções da imagem original.
+  // Criar uma nova imagem com as mesmas dimenções da imagem original.
   Image copyImg = AllocateImageHeader(img->width, img->height);
 
-  // Igualar o número de cores.
+  // Copia o número de cores utilizadas na LUT (Look-Up Table) para a imagem copiada.
   copyImg->num_colors = img->num_colors;
 
-  // Copiar a LUT da imagem original para a imagem copiada.
-  // Como as cores estão no formato LUT, temos de multiplicar pelo tamanho de LUT.
+  // Copiar toda a LUT da imagem original para a imagem copiada.
+  // Como as cores estão no formato LUT (num_colors) cada uma com um valor RGB (rgb_t),
+  // temos de multiplicar pelo tamanho de LUT (num_colors).
   memcpy(copyImg->LUT, img->LUT, img->num_colors * sizeof(rgb_t));
 
   // Localizar e copiar linha por linha da imagem.
@@ -572,9 +570,6 @@ int ImageIsEqual(const Image img1, const Image img2) {              //completar
   assert(img1 != NULL);
   assert(img2 != NULL);
 
-  // TO BE COMPLETED
-  // ...
-
   // Número de comparações realizadas pixel a pixel.
   int comp = 0;
 
@@ -595,11 +590,11 @@ int ImageIsEqual(const Image img1, const Image img2) {              //completar
   // então não são imagens iguais.
   for (uint32 i = 0; i < img1->height; i++) {
     for (uint32 j = 0; j < img1->width; j++) {
-      comp ++;
+      comp ++;                                        //incrementa 1 a cada comparação
       rgb_t color1 = img1->LUT[img1->image[i][j]];
       rgb_t color2 = img2->LUT[img2->image[i][j]];
       if (color1 != color2){
-        printf("Número de comparações: %d\n", comp);
+        printf("Número de comparações: %d\n", comp); 
         return 0;
       }
     }
@@ -632,12 +627,10 @@ int ImageIsDifferent(const Image img1, const Image img2) {
 Image ImageRotate90CW(const Image img) {                            //completar
   assert(img != NULL);
 
-  // TO BE COMPLETED
-  // ...
-
+  // Cria uma nova imagem com as dimensões invertidas(linha passa a coluna e coluna passa a linha).
   Image img90CW = AllocateImageHeader(img->height, img->width);
 
-  // Igualar o número de cores.
+  // Copia o número de cores utilizadas na LUT (Look-Up Table) para a imagem copiada.
   img90CW->num_colors = img->num_colors;
 
   // Copiar a LUT da imagem original para a imagem rota90Cw.
@@ -668,11 +661,8 @@ Image ImageRotate90CW(const Image img) {                            //completar
 Image ImageRotate180CW(const Image img) {                           //completar
   assert(img != NULL);
 
-  // TO BE COMPLETED
-  // ...
-
-  Image img180CW = ImageCreate(img->width, img->height);
-  //Image img180CW = AllocateImageHeader(img->width, img->height);
+  //Image img180CW = ImageCreate(img->width, imgCW->height);
+  Image img180CW = AllocateImageHeader(img->width, img->height);
 
   // Igualar o número de cores.
   img180CW->num_colors = img->num_colors;
@@ -682,8 +672,8 @@ Image ImageRotate180CW(const Image img) {                           //completar
   memcpy(img180CW->LUT, img->LUT, img->num_colors * sizeof(rgb_t));
 
   // Alocar a linha que vai usar.
-  for (uint32 i = 0; i < img->width; i++)
-        img180CW->image[i] = AllocateRowArray(img->height);
+  for (uint32 i = 0; i < img180CW->height; i++)
+        img180CW->image[i] = AllocateRowArray(img180CW->width);
 
   // O pixel da img(i, j) passa a ser img180CW(imgHeight - 1 - i, imgWidth - 1 - j)
   for (uint32 i = 0; i < img->height; i++) {
