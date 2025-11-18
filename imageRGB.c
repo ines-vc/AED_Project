@@ -295,12 +295,12 @@ Image ImageCopy(const Image img) {
 
   // Copiar a LUT da imagem original para a imagem copiada.
   // Como as cores estão no formato LUT, temos de multiplicar pelo tamanho de LUT.
-  memcopy(copyImg->LUT, img->LUT, img->num_colors * sizeof(rgb_t));
+  memcpy(copyImg->LUT, img->LUT, img->num_colors * sizeof(rgb_t));
 
   // Localizar e copiar linha por linha da imagem.
   for (uint32 i = 0; i < img->height; i++) {
     copyImg->image[i] = AllocateRowArray(img->width);
-    memcopy(copyImg->image[i], img->image[i], img->width * sizeof(uint16));
+    memcpy(copyImg->image[i], img->image[i], img->width * sizeof(uint16));
   }
 
   return copyImg;
@@ -635,28 +635,28 @@ Image ImageRotate90CW(const Image img) {                            //completar
   // TO BE COMPLETED
   // ...
 
-  Image img180CW = AllocateImageHeader(img->height, img->width);
+  Image img90CW = AllocateImageHeader(img->height, img->width);
 
   // Igualar o número de cores.
-  img180CW->num_colors = img->num_colors;
+  img90CW->num_colors = img->num_colors;
 
   // Copiar a LUT da imagem original para a imagem rota90Cw.
   // Como as cores estão no formato LUT, temos de multiplicar pelo tamanho de LUT.
-  memcpy(img180CW->LUT, img->LUT, img->num_colors * sizeof(rgb_t));
+  memcpy(img90CW->LUT, img->LUT, img->num_colors * sizeof(rgb_t));
 
   // Alocar a linha que vai usar.
   for (uint32 i = 0; i < img->width; i++)
-        img180CW->image[i] = AllocateRowArray(img->height);
+        img90CW->image[i] = AllocateRowArray(img->height);
 
   // O pixel da img(i, j) passa a ser img180CW(j, imgHeight - 1 - i)
   // A primeira linha passa a ser a última coluna.
   for (uint32 i = 0; i < img->height; i++) {
     for (uint32 j = 0; j < img->width; j++) {
-      img180CW->image[j][(img->height) - 1 - i] = img->image[i][j];
+      img90CW->image[j][(img->height) - 1 - i] = img->image[i][j];
     }
   }
 
-  return img180CW;
+  return img90CW;
 }
 
 /// Rotate 180 degrees clockwise (CW).
@@ -684,11 +684,10 @@ Image ImageRotate180CW(const Image img) {                           //completar
   for (uint32 i = 0; i < img->width; i++)
         img180CW->image[i] = AllocateRowArray(img->height);
 
-  // O pixel da img(i, j) passa a ser img180CW(j, imgHeight - 1 - i)
-  // A primeira linha passa a ser a última coluna.
+  // O pixel da img(i, j) passa a ser img180CW(imgHeight - 1 - i, imgWidth - 1 - j)
   for (uint32 i = 0; i < img->height; i++) {
     for (uint32 j = 0; j < img->width; j++) {
-      img180CW->image[j][(img->height) - 1 - i] = img->image[i][j];
+      img180CW->image[(img->height) - 1 - i][(img->width) - 1 - j] = img->image[i][j];
     }
   }
   return img180CW;
