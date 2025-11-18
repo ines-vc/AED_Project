@@ -82,7 +82,7 @@ int main(int argc, char* argv[]) {
   printf("11) Image180CW\n");
   Image image_7 = ImageLoadPBM("img/feep.pbm");
 
-  Image result180CW = ImageRotate90CW(image_7);
+  Image result180CW = ImageRotate180CW(image_7);
   ImageSavePBM(result180CW, "feep180CW.pbm");
   
 

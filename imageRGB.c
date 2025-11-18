@@ -671,7 +671,8 @@ Image ImageRotate180CW(const Image img) {                           //completar
   // TO BE COMPLETED
   // ...
 
-  Image img180CW = AllocateImageHeader(img->height, img->width);
+  Image img180CW = ImageCreate(img->width, img->height);
+  //Image img180CW = AllocateImageHeader(img->width, img->height);
 
   // Igualar o número de cores.
   img180CW->num_colors = img->num_colors;
@@ -688,6 +689,7 @@ Image ImageRotate180CW(const Image img) {                           //completar
   for (uint32 i = 0; i < img->height; i++) {
     for (uint32 j = 0; j < img->width; j++) {
       img180CW->image[(img->height) - 1 - i][(img->width) - 1 - j] = img->image[i][j];
+      //img180CW->image[i][j] = img->image[(img->height) - 1 - i][(img->width) - 1 - j];
     }
   }
   return img180CW;
