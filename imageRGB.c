@@ -284,22 +284,26 @@ void ImageDestroy(Image* imgp) {
 Image ImageCopy(const Image img) {
   assert(img != NULL);
 
-  // Allocate header of new image in order to create it with the same size
-  Image newImg = AllocateImageHeader(img->width, img->height);
+  // TO BE COMPLETED
+  // ...
 
-  // Copy number of colors
-  newImg->num_colors = img->num_colors;
+  // Criar uma imagem com as mesmas dimenções da imagem original.
+  Image copyImg = AllocateImageHeader(img->width, img->height);
 
-  // Copy LUT from original image to new image
-  memcpy(newImg->LUT, img->LUT, img->num_colors * sizeof(rgb_t));
+  // Igualar o número de cores.
+  copyImg->num_colors = img->num_colors;
 
-  // Allocate and copy each row of the image
+  // Copiar a LUT da imagem original para a imagem copiada.
+  // Como as cores estão no formato LUT, temos de multiplicar pelo tamanho de LUT.
+  memcpy(copyImg->LUT, img->LUT, img->num_colors * sizeof(rgb_t));
+
+  // Localizar e copiar linha por linha da imagem.
   for (uint32 i = 0; i < img->height; i++) {
-    newImg->image[i] = AllocateRowArray(img->width);
-    memcpy(newImg->image[i], img->image[i], img->width * sizeof(uint16));
+    copyImg->image[i] = AllocateRowArray(img->width);
+    memcpy(copyImg->image[i], img->image[i], img->width * sizeof(uint16));
   }
 
-  return newImg;
+  return copyImg;
 }
 
 /// Printing on the console
@@ -571,7 +575,32 @@ int ImageIsEqual(const Image img1, const Image img2) {              //completar
   // TO BE COMPLETED
   // ...
 
-  return 0;
+  // Se o comprimento ou a largura de uma imagem for diferente ao outro,
+  // então as imagens não são iguais.
+  if (img1->height != img2->height || img1->width != img2->width) {
+    return 0;
+  }
+
+  // Se o número de cores de duas imagens forem diferentes,
+  // então as imagens não são iguais.
+  if (img1->num_colors != img2->num_colors) {
+    return 0;
+  }
+
+  // Percorrer sobre todas as linhas e colunas
+  // Se a cor do pixel da imagem1 for diferente ao da imagem2 (nas mesmas posições),
+  // então não são imagens iguais
+  for (uint32 i = 0; i < img1->height; i++) {
+    for (uint32 j = 0; j < img1->width; j++) {
+      rgb_t color1 = img1->LUT[img1->image[i][j]];
+      rgb_t color2 = img2->LUT[img2->image[i][j]];
+      if (color1 != color2){
+        return 0;
+      }
+    }
+  }
+
+  return 1;
 }
 
 int ImageIsDifferent(const Image img1, const Image img2) {
