@@ -76,13 +76,14 @@ int main(int argc, char* argv[]) {
   printf("10) Image90CW\n");
   Image image_6 = ImageLoadPBM("img/feep.pbm");
 
-  if (image_6 == NULL)
-    printf("ERRO: image_6 é NULL!\n");
-  else
-    printf("image_6 carregada com sucesso.\n");
-
   Image result90CW = ImageRotate90CW(image_6);
   ImageSavePBM(result90CW, "feep90CW.pbm");
+
+  printf("11) Image180CW\n");
+  Image image_7 = ImageLoadPBM("img/feep.pbm");
+
+  Image result180CW = ImageRotate90CW(image_7);
+  ImageSavePBM(result180CW, "feep180CW.pbm");
   
 
   ImageDestroy(&white_image);
