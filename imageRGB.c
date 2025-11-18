@@ -590,10 +590,10 @@ int ImageIsEqual(const Image img1, const Image img2) {              //completar
   // então não são imagens iguais.
   for (uint32 i = 0; i < img1->height; i++) {
     for (uint32 j = 0; j < img1->width; j++) {
-      comp ++;                                        //incrementa 1 a cada comparação
+      comp ++;                                        // incrementa 1 a cada comparação
       rgb_t color1 = img1->LUT[img1->image[i][j]];
       rgb_t color2 = img2->LUT[img2->image[i][j]];
-      if (color1 != color2){
+      if (color1 != color2){                          //  compara as cores pixel a pixel
         printf("Número de comparações: %d\n", comp); 
         return 0;
       }
@@ -661,7 +661,7 @@ Image ImageRotate90CW(const Image img) {                            //completar
 Image ImageRotate180CW(const Image img) {                           //completar
   assert(img != NULL);
 
-  //Image img180CW = ImageCreate(img->width, imgCW->height);
+  //cria uma nova imegem com as mesmas dimenções da imagem original.
   Image img180CW = AllocateImageHeader(img->width, img->height);
 
   // Igualar o número de cores.
