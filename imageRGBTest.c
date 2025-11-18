@@ -67,6 +67,24 @@ int main(int argc, char* argv[]) {
   Image image_3 = ImageCreatePalete(4 * 32, 4 * 32, 4);
   ImageSavePPM(image_3, "palete.ppm");
 
+  printf("9) ImageIsEqual\n");
+  Image image_4 = ImageLoadPPM("img/feep.ppm");
+  Image image_5 = ImageLoadPBM("img/feep.pbm");
+  int result = ImageIsEqual(image_4, image_5);
+  printf("Resultado = %d\n", result);
+
+  printf("10) Image90CW\n");
+  Image image_6 = ImageLoadPBM("img/feep.pbm");
+
+  if (image_6 == NULL)
+    printf("ERRO: image_6 é NULL!\n");
+  else
+    printf("image_6 carregada com sucesso.\n");
+
+  Image result90CW = ImageRotate90CW(image_6);
+  ImageSavePBM(result90CW, "feep90CW.pbm");
+  
+
   ImageDestroy(&white_image);
   ImageDestroy(&black_image);
   if (copy_image != NULL) {
