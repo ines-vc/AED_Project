@@ -293,12 +293,20 @@ Image ImageCopy(const Image img) {
   // Copiar toda a LUT da imagem original para a imagem copiada.
   // Como as cores estão no formato LUT (num_colors) cada uma com um valor RGB (rgb_t),
   // temos de multiplicar pelo tamanho de LUT (num_colors).
-  memcpy(copyImg->LUT, img->LUT, img->num_colors * sizeof(rgb_t));
+  //memcpy(copyImg->LUT, img->LUT, img->num_colors * sizeof(rgb_t));
+
+  for (uint16 c = 0; c < img->num_colors; c++) {
+    copyImg->LUT[c] = img->LUT[c];
+  }
 
   // Localizar e copiar linha por linha da imagem.
   for (uint32 i = 0; i < img->height; i++) {
     copyImg->image[i] = AllocateRowArray(img->width);
     memcpy(copyImg->image[i], img->image[i], img->width * sizeof(uint16));
+    
+    for (uint32 j = 0; j < img->width; j++) {
+      copyImg->image[i][j] = img->image[i][j];
+    }
   }
 
   return copyImg;
@@ -591,15 +599,13 @@ int ImageIsEqual(const Image img1, const Image img2) {              //completar
   for (uint32 i = 0; i < img1->height; i++) {
     for (uint32 j = 0; j < img1->width; j++) {
       comp ++;                                        // incrementa 1 a cada comparação
-      rgb_t color1 = img1->LUT[img1->image[i][j]];
-      rgb_t color2 = img2->LUT[img2->image[i][j]];
-      if (color1 != color2){                          //  compara as cores pixel a pixel
-        printf("Número de comparações: %d\n", comp); 
+      if (img1->LUT[img1->image[i][j]] != img2->LUT[img2->image[i][j]]){                          //  compara as cores pixel a pixel
+        //printf("Número de comparações: %d\n", comp);      //apagar
         return 0;
       }
     }
   }
-  printf("Número de comparações: %d\n", comp);
+  //printf("Número de comparações: %d\n", comp);      //apagar
   return 1;
 }
 
@@ -635,11 +641,14 @@ Image ImageRotate90CW(const Image img) {                            //completar
 
   // Copiar a LUT da imagem original para a imagem rota90Cw.
   // Como as cores estão no formato LUT, temos de multiplicar pelo tamanho de LUT.
-  memcpy(img90CW->LUT, img->LUT, img->num_colors * sizeof(rgb_t));
+  //memcpy(img90CW->LUT, img->LUT, img->num_colors * sizeof(rgb_t));
+
+  for (uint16 c = 0; c < img->num_colors; c++)
+    img90CW->LUT[c] = img->LUT[c];
 
   // Alocar a linha que vai usar.
   for (uint32 i = 0; i < img->width; i++)
-        img90CW->image[i] = AllocateRowArray(img->height);
+        img90CW->image[i] = AllocateRowArray(img90CW->width);
 
   // O pixel da img(i, j) passa a ser img180CW(j, imgHeight - 1 - i)
   // A primeira linha passa a ser a última coluna.
@@ -669,7 +678,10 @@ Image ImageRotate180CW(const Image img) {                           //completar
 
   // Copiar a LUT da imagem original para a imagem rota90Cw.
   // Como as cores estão no formato LUT, temos de multiplicar pelo tamanho de LUT.
-  memcpy(img180CW->LUT, img->LUT, img->num_colors * sizeof(rgb_t));
+  //memcpy(img180CW->LUT, img->LUT, img->num_colors * sizeof(rgb_t));
+
+  for (uint16 c = 0; c < img->num_colors; c++)
+    img180CW->LUT[c] = img->LUT[c];
 
   // Alocar a linha que vai usar.
   for (uint32 i = 0; i < img180CW->height; i++)
@@ -715,10 +727,42 @@ int ImageRegionFillingRecursive(Image img, int u, int v, uint16 label) {
   assert(ImageIsValidPixel(img, u, v));
   assert(label < FIXED_LUT_SIZE);
 
-  // TO BE COMPLETED
-  // ...
-
-  return 0;
+  // Obter a cor original do pixel semente
+  uint16 original_color = img->image[v][u];
+  
+  // Verificar se está dentro dos limites ou se tem cor original ou se já tem a cor destino, retorna 0.
+  if (img->image[v][u] != original_color || original_color == label) {
+    return 0;
+  }
+  
+  // Mudar cor do pixel atual
+  img->image[v][u] = label;
+  int count = 1;
+  
+  // Recursão para os 4 vizinhos - SUA ESTRUTURA ORIGINAL
+  // Mas cada chamada vai ter seu próprio assert para validar coordenadas
+  
+  // DIREITA
+  if (ImageIsValidPixel(img, u + 1, v) && img->image[v][u + 1] == original_color) {
+    count += ImageRegionFillingRecursive(img, u + 1, v, label);
+  }
+  
+  // ESQUERDA
+  if (ImageIsValidPixel(img, u - 1, v) && img->image[v][u - 1] == original_color) {
+    count += ImageRegionFillingRecursive(img, u - 1, v, label);
+  }
+  
+  // BAIXO
+  if (ImageIsValidPixel(img, u, v + 1) && img->image[v + 1][u] == original_color) {
+    count += ImageRegionFillingRecursive(img, u, v + 1, label);
+  }
+  
+  // CIMA
+  if (ImageIsValidPixel(img, u, v - 1) && img->image[v - 1][u] == original_color) {
+    count += ImageRegionFillingRecursive(img, u, v - 1, label);
+  }
+  
+  return count;
 }
 
 /// Region growing using a STACK of pixel coordinates to
@@ -728,8 +772,7 @@ int ImageRegionFillingWithSTACK(Image img, int u, int v, uint16 label) {
   assert(ImageIsValidPixel(img, u, v));
   assert(label < FIXED_LUT_SIZE);
 
-  // TO BE COMPLETED
-  // ...
+
 
   return 0;
 }

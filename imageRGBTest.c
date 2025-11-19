@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
 
   printf("5) ImageCopy\n");
   Image copy_image = ImageCopy(image_chess_1);
-  // ImageRAWPrint(copy_image);
+  //ImageRAWPrint(copy_image);
   if (copy_image != NULL) {
     ImageSavePBM(copy_image, "copy_image.pbm");
   }
@@ -66,7 +66,7 @@ int main(int argc, char* argv[]) {
   printf("8) ImageCreatePalete\n");
   Image image_3 = ImageCreatePalete(4 * 32, 4 * 32, 4);
   ImageSavePPM(image_3, "palete.ppm");
-
+  
   printf("9) ImageIsEqual\n");
   Image image_4 = ImageLoadPPM("img/feep.ppm");
   Image image_5 = ImageLoadPBM("img/feep.pbm");
@@ -75,16 +75,34 @@ int main(int argc, char* argv[]) {
 
   printf("10) Image90CW\n");
   Image image_6 = ImageLoadPBM("img/feep.pbm");
-
   Image result90CW = ImageRotate90CW(image_6);
   ImageSavePBM(result90CW, "feep90CW.pbm");
 
   printf("11) Image180CW\n");
   Image image_7 = ImageLoadPBM("img/feep.pbm");
-
   Image result180CW = ImageRotate180CW(image_7);
   ImageSavePBM(result180CW, "feep180CW.pbm");
-  
+
+  printf("12) ImageRegionFillingRecursive\n");
+  Image image_8 = ImageLoadPBM("img/feep.pbm");
+
+  // Usar uma cor que definitivamente NÃO existe na imagem
+  // Criar uma NOVA cor na LUT
+  rgb_t nova_cor = 0x888888;  // cinza
+  uint16 novo_label = LUTAllocColor(image_8, nova_cor);
+
+  printf("Nova cor criada na LUT: label %d\n", novo_label);
+
+  // Agora o flood fill DEVE funcionar porque:
+  // - A cor original é branco (0) ou preto (1)  
+  // - A cor destino é nova (diferente)
+  int filled_pixels = ImageRegionFillingRecursive(image_8, 2, 3, novo_label);
+  printf("Pixels preenchidos: %d\n", filled_pixels);
+
+  ImageSavePPM(image_8, "feep_filled_recursive.ppm");  // usar PPM para ver cores
+  ImageDestroy(&image_8);
+
+
 
   ImageDestroy(&white_image);
   ImageDestroy(&black_image);
@@ -96,6 +114,10 @@ int main(int argc, char* argv[]) {
   ImageDestroy(&image_1);
   ImageDestroy(&image_2);
   ImageDestroy(&image_3);
+  ImageDestroy(&image_4);
+  ImageDestroy(&image_5);
+  ImageDestroy(&image_6);
+  ImageDestroy(&image_7);
 
   return 0;
 }
