@@ -125,6 +125,15 @@ int main(int argc, char* argv[]) {
   Image result180CW = ImageRotate180CW(image_7);
   ImageSavePBM(result180CW, "feep180CW.pbm");
 
+  printf("12) ImageRegionFillingRecursive - Teste básico\n");
+  Image image_8 = ImageLoadPBM("img/feep.pbm");
+  ImageRAWPrint(image_8);
+  // Preencher região WHITE começando em (2, 2) com BLACK
+  int pixels = ImageRegionFillingRecursive(image_8, 2, 2, BLACK);  
+  printf("Pixels preenchidos: %d\n", pixels);
+  ImageRAWPrint(image_8);
+  ImageSavePBM(image_8, "feep_recursive.pbm");
+
   ImageDestroy(&white_image);
   ImageDestroy(&black_image);
   if (copy_image != NULL) {
@@ -139,6 +148,7 @@ int main(int argc, char* argv[]) {
   ImageDestroy(&image_5);
   ImageDestroy(&image_6);
   ImageDestroy(&image_7);
+  ImageDestroy(&image_8);
 
   test_ImageIsEqual_performance();
 

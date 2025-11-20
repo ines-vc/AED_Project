@@ -600,12 +600,12 @@ int ImageIsEqual(const Image img1, const Image img2) {              //completar
     for (uint32 j = 0; j < img1->width; j++) {
       comp ++;                                        // incrementa 1 a cada comparação
       if (img1->LUT[img1->image[i][j]] != img2->LUT[img2->image[i][j]]){                          //  compara as cores pixel a pixel
-        //printf("Número de comparações: %d\n", comp);      //apagar
+        printf("Número de comparações: %d\n", comp);      //apagar
         return 0;
       }
     }
   }
-  //printf("Número de comparações: %d\n", comp);      //apagar
+  printf("Número de comparações: %d\n", comp);      //apagar
   return 1;
 }
 
