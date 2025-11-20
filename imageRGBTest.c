@@ -19,6 +19,48 @@
 #include "imageRGB.h"
 #include "instrumentation.h"
 
+void test_ImageIsEqual_performance() {
+    const uint32 WIDTH = 500;
+    const uint32 HEIGHT = 500;
+
+    printf("\n--- Teste de desempenho: ImageIsEqual ---\n");
+
+    // Criar imagens para teste
+    printf("6) ImageLoadPBM\n");
+    Image img1 = ImageLoadPPM("img/feep.ppm");
+    
+    
+
+    printf("7) ImageLoadPPM\n");
+    Image img2 = ImageLoadPPM("img/feep.ppm");
+    
+
+
+    Image img3 = ImageCreate(WIDTH, HEIGHT);
+  
+    // Nomear o contador de pixels comparados
+    InstrName[0] = "Pixel_Comparisons";
+
+    // --- Teste 1: Imagens idênticas ---
+    printf("\nTeste 1 (idênticas)\n");
+    InstrReset();
+    int equal1 = ImageIsEqual(img1, img2);
+    InstrPrint();
+    printf("Resultado: %s\n", equal1 ? "Igual" : "Diferente");
+
+    // --- Teste 2: Imagens diferentes ---
+    printf("\nTeste 2 (diferentes)\n");
+    InstrReset();
+    int equal2 = ImageIsEqual(img1, img3);
+    InstrPrint();
+    printf("Resultado: %s\n", equal2 ? "Igual" : "Diferente");
+
+    // Limpeza de memória
+    ImageDestroy(&img1);
+    ImageDestroy(&img2);
+    ImageDestroy(&img3);
+}
+
 int main(int argc, char* argv[]) {
   program_name = argv[0];
   if (argc != 1) {
@@ -83,27 +125,6 @@ int main(int argc, char* argv[]) {
   Image result180CW = ImageRotate180CW(image_7);
   ImageSavePBM(result180CW, "feep180CW.pbm");
 
-  printf("12) ImageRegionFillingRecursive\n");
-  Image image_8 = ImageLoadPBM("img/feep.pbm");
-
-  // Usar uma cor que definitivamente NÃO existe na imagem
-  // Criar uma NOVA cor na LUT
-  rgb_t nova_cor = 0x888888;  // cinza
-  uint16 novo_label = LUTAllocColor(image_8, nova_cor);
-
-  printf("Nova cor criada na LUT: label %d\n", novo_label);
-
-  // Agora o flood fill DEVE funcionar porque:
-  // - A cor original é branco (0) ou preto (1)  
-  // - A cor destino é nova (diferente)
-  int filled_pixels = ImageRegionFillingRecursive(image_8, 2, 3, novo_label);
-  printf("Pixels preenchidos: %d\n", filled_pixels);
-
-  ImageSavePPM(image_8, "feep_filled_recursive.ppm");  // usar PPM para ver cores
-  ImageDestroy(&image_8);
-
-
-
   ImageDestroy(&white_image);
   ImageDestroy(&black_image);
   if (copy_image != NULL) {
@@ -118,6 +139,8 @@ int main(int argc, char* argv[]) {
   ImageDestroy(&image_5);
   ImageDestroy(&image_6);
   ImageDestroy(&image_7);
+
+  test_ImageIsEqual_performance();
 
   return 0;
 }
