@@ -309,7 +309,7 @@ Image ImageCopy(const Image img) {
     }
   }
 
-  return copyImg;
+  return copyImg;                                         // Retorna a imagem copiada.
 }
 
 /// Printing on the console
@@ -582,31 +582,31 @@ int ImageIsEqual(const Image img1, const Image img2) {              //completar
   int comp = 0;
 
   // Se o comprimento ou a largura de uma imagem for diferente ao outro,
-  // então as imagens não são iguais.
+  // então as imagens não são iguais (return 0).
   if (img1->height != img2->height || img1->width != img2->width) {
     return 0;
   }
 
   // Se o número de cores de duas imagens forem diferentes,
-  // então as imagens não são iguais.
+  // então as imagens não são iguais (return 0).
   if (img1->num_colors != img2->num_colors) {
     return 0;
   }
 
   // Percorrer sobre todas as linhas e colunas da imagem1.
   // Se a cor do pixel da imagem1 for diferente ao da imagem2 (nas mesmas posições),
-  // então não são imagens iguais.
+  // então não são imagens iguais (return 0).
   for (uint32 i = 0; i < img1->height; i++) {
     for (uint32 j = 0; j < img1->width; j++) {
-      comp ++;                                        // incrementa 1 a cada comparação
-      if (img1->LUT[img1->image[i][j]] != img2->LUT[img2->image[i][j]]){                  //  compara as cores pixel a pixel
+      comp ++;                                                                             // Incrementa 1 a cada comparação.
+      if (img1->LUT[img1->image[i][j]] != img2->LUT[img2->image[i][j]]){                  //  Compara as cores pixel a pixel.
         printf("Número de comparações: %d\n", comp);      //apagar
-        return 0;
+        return 0;             
       }
     }
   }
   printf("Número de comparações: %d\n", comp);      //apagar
-  return 1;
+  return 1;                                                                              // Retorna 1 se as imagens forem iguais.
 }
 
 int ImageIsDifferent(const Image img1, const Image img2) {
