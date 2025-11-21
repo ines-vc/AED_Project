@@ -730,8 +730,8 @@ int ImageRegionFillingRecursive(Image img, int u, int v, uint16 label) {
   // Obter a cor original do pixel semente
   uint16 original_color = img->image[v][u];
   
-  // Verificar se está dentro dos limites ou se tem cor original ou se já tem a cor destino, retorna 0.
-  if (img->image[v][u] != original_color || original_color == label) {
+  // Verificar se já tem a cor destino, retorna 0.
+  if (original_color == label) {
     return 0;
   }
   
@@ -747,11 +747,6 @@ int ImageRegionFillingRecursive(Image img, int u, int v, uint16 label) {
     count += ImageRegionFillingRecursive(img, u + 1, v, label);
   }
   
-  // ESQUERDA
-  if (ImageIsValidPixel(img, u - 1, v) && img->image[v][u - 1] == original_color) {
-    count += ImageRegionFillingRecursive(img, u - 1, v, label);
-  }
-  
   // BAIXO
   if (ImageIsValidPixel(img, u, v + 1) && img->image[v + 1][u] == original_color) {
     count += ImageRegionFillingRecursive(img, u, v + 1, label);
@@ -761,8 +756,13 @@ int ImageRegionFillingRecursive(Image img, int u, int v, uint16 label) {
   if (ImageIsValidPixel(img, u, v - 1) && img->image[v - 1][u] == original_color) {
     count += ImageRegionFillingRecursive(img, u, v - 1, label);
   }
+
+  // ESQUERDA
+  if (ImageIsValidPixel(img, u - 1, v) && img->image[v][u - 1] == original_color) {
+    count += ImageRegionFillingRecursive(img, u - 1, v, label);
+  }
   
-  return count;
+  return 0 + count;
 }
 
 /// Region growing using a STACK of pixel coordinates to

@@ -128,8 +128,10 @@ int main(int argc, char* argv[]) {
   printf("12) ImageRegionFillingRecursive - Teste básico\n");
   Image image_8 = ImageLoadPBM("img/feep.pbm");
   ImageRAWPrint(image_8);
+  printf("ANTES:\n");
+  ImageRAWPrint(image_8);
   // Preencher região WHITE começando em (2, 2) com BLACK
-  int pixels = ImageRegionFillingRecursive(image_8, 2, 2, BLACK);  
+  int pixels = ImageRegionFillingRecursive(image_8, 0, 0, BLACK);  
   printf("Pixels preenchidos: %d\n", pixels);
   ImageRAWPrint(image_8);
   ImageSavePBM(image_8, "feep_recursive.pbm");
@@ -139,6 +141,7 @@ int main(int argc, char* argv[]) {
   if (copy_image != NULL) {
     ImageDestroy(&copy_image);
   }
+
   ImageDestroy(&image_chess_1);
   ImageDestroy(&image_chess_2);
   ImageDestroy(&image_1);
