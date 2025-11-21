@@ -11,8 +11,8 @@
 /// 2025
 
 // Student authors (fill in below):
-// NMec: 
-// Name:
+// NMec: 125738
+// Name: Inês Cardoso
 // NMec: 126541
 // Name: Jéssica Zheng
 //
@@ -599,7 +599,7 @@ int ImageIsEqual(const Image img1, const Image img2) {              //completar
   for (uint32 i = 0; i < img1->height; i++) {
     for (uint32 j = 0; j < img1->width; j++) {
       comp ++;                                        // incrementa 1 a cada comparação
-      if (img1->LUT[img1->image[i][j]] != img2->LUT[img2->image[i][j]]){                          //  compara as cores pixel a pixel
+      if (img1->LUT[img1->image[i][j]] != img2->LUT[img2->image[i][j]]){                  //  compara as cores pixel a pixel
         printf("Número de comparações: %d\n", comp);      //apagar
         return 0;
       }
@@ -658,7 +658,7 @@ Image ImageRotate90CW(const Image img) {                            //completar
     }
   }
 
-  return img90CW;
+  return img90CW;                  // Retorna a imagem rodada 90 graus.
 }
 
 /// Rotate 180 degrees clockwise (CW).
@@ -694,7 +694,7 @@ Image ImageRotate180CW(const Image img) {                           //completar
       //img180CW->image[i][j] = img->image[(img->height) - 1 - i][(img->width) - 1 - j];
     }
   }
-  return img180CW;
+  return img180CW;                  // Retorna a imagem rodada 180 graus.                                                     
 }
 
 /// Check whether pixel coords (u, v) are inside img.
@@ -727,42 +727,46 @@ int ImageRegionFillingRecursive(Image img, int u, int v, uint16 label) {
   assert(ImageIsValidPixel(img, u, v));
   assert(label < FIXED_LUT_SIZE);
 
-  // Obter a cor original do pixel semente
+  // Guardar a cor do pixel atual da imagem em original_color.
   uint16 original_color = img->image[v][u];
   
-  // Verificar se já tem a cor destino, retorna 0.
+  // Se a cor do pixel atual (original_color) for igual à que pretendemos mudar(label),
+  // não altera a cor (return 0).
   if (original_color == label) {
     return 0;
   }
   
-  // Mudar cor do pixel atual
+  // Mudar a cor do pixel atual para a cor pretendida (label).
   img->image[v][u] = label;
-  int count = 1;
+  int count = 1;                  // Incrementa 1 ao número de pixels alterados (labeld pixels).
   
-  // Recursão para os 4 vizinhos - SUA ESTRUTURA ORIGINAL
-  // Mas cada chamada vai ter seu próprio assert para validar coordenadas
-  
-  // DIREITA
+  // Percurrer os 4 pixels vizinhos (direita, baixo, cima, esquerda).
+
+  // Se o pixel for valido, ou seja, estiver dentro do limite da imagem
+  // e se a cor do pixel for igual à cor que queremos alterar (original_color),
+  // então muda a cor para a cor pretendida (label) e incrementa 1 ao número de pixels alterados.
+
+  // Deslocar para a direita.
   if (ImageIsValidPixel(img, u + 1, v) && img->image[v][u + 1] == original_color) {
     count += ImageRegionFillingRecursive(img, u + 1, v, label);
   }
   
-  // BAIXO
+  // Deslocar para baixo.
   if (ImageIsValidPixel(img, u, v + 1) && img->image[v + 1][u] == original_color) {
     count += ImageRegionFillingRecursive(img, u, v + 1, label);
   }
   
-  // CIMA
+  // Deslocar para cima.
   if (ImageIsValidPixel(img, u, v - 1) && img->image[v - 1][u] == original_color) {
     count += ImageRegionFillingRecursive(img, u, v - 1, label);
   }
 
-  // ESQUERDA
+  // Deslocar para a esquerda.
   if (ImageIsValidPixel(img, u - 1, v) && img->image[v][u - 1] == original_color) {
     count += ImageRegionFillingRecursive(img, u - 1, v, label);
   }
   
-  return 0 + count;
+  return count;                                             // Returna o número de pixels alterados.
 }
 
 /// Region growing using a STACK of pixel coordinates to
@@ -830,7 +834,7 @@ int ImageRegionFillingWithSTACK(Image img, int u, int v, uint16 label) {
   // Destruir a pilha
   StackDestroy(&stack);
   
-  return 0 + count;
+  return count;
 }
 
 /// Region growing using a QUEUE of pixel coordinates to
