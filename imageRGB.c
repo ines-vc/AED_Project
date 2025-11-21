@@ -11,10 +11,10 @@
 /// 2025
 
 // Student authors (fill in below):
-// NMec:
+// NMec: 
 // Name:
-// NMec:
-// Name:
+// NMec: 126541
+// Name: Jéssica Zheng
 //
 // Date: 17/11/2025
 //
@@ -772,9 +772,65 @@ int ImageRegionFillingWithSTACK(Image img, int u, int v, uint16 label) {
   assert(ImageIsValidPixel(img, u, v));
   assert(label < FIXED_LUT_SIZE);
 
+  // Obter a cor original do pixel semente
+  uint16 original_color = img->image[v][u];
+  
+  // Se já tem a cor destino, não faz nada
+  if (original_color == label) {
+    return 0;
+  }
+  
+  // Criar a pilha
+  Stack* stack = StackCreate(100);  // Tamanho inicial
+  
+  // Contador de pixels preenchidos
+  int count = 0;
+  
+  // Adicionar o pixel inicial à pilha
+  StackPush(stack, PixelCoordsCreate(u, v));
+  
+  // Remover pixel do topo da pilha enquanto a pilha não estiver vazia
+  while (!StackIsEmpty(stack)) {
+    PixelCoords current = StackPop(stack);
+    int cu = PixelCoordsGetU(current);
+    int cv = PixelCoordsGetV(current);
+    
+    // Verificar se o pixel é válido e tem a cor original
+    if (!ImageIsValidPixel(img, cu, cv) || img->image[cv][cu] != original_color) {
+      continue;  // Ignorar este pixel
+    }
+    
+    // Preencher o pixel com a nova cor
+    img->image[cv][cu] = label;
+    count++;
+    
+    // Adicionar os 4 vizinhos à pilha (DIREITA, ESQUERDA, BAIXO, CIMA)
+    
+    // DIREITA (u+1, v)
+    if (ImageIsValidPixel(img, cu + 1, cv)) {
+      StackPush(stack, PixelCoordsCreate(cu + 1, cv));
+    }
+    
+    // BAIXO (u, v+1)
+    if (ImageIsValidPixel(img, cu, cv + 1)) {
+      StackPush(stack, PixelCoordsCreate(cu, cv + 1));
+    }
+    
+    // CIMA (u, v-1)
+    if (ImageIsValidPixel(img, cu, cv - 1)) {
+      StackPush(stack, PixelCoordsCreate(cu, cv - 1));
+    }
 
-
-  return 0;
+    // ESQUERDA (u-1, v)
+    if (ImageIsValidPixel(img, cu - 1, cv)) {
+      StackPush(stack, PixelCoordsCreate(cu - 1, cv));
+    }
+  }
+  
+  // Destruir a pilha
+  StackDestroy(&stack);
+  
+  return 0 + count;
 }
 
 /// Region growing using a QUEUE of pixel coordinates to
@@ -784,8 +840,70 @@ int ImageRegionFillingWithQUEUE(Image img, int u, int v, uint16 label) {
   assert(ImageIsValidPixel(img, u, v));
   assert(label < FIXED_LUT_SIZE);
 
-  // TO BE COMPLETED
-  // ...
+  // Obter a cor original do pixel semente
+  uint16 original_color = img->image[v][u];
+  
+  // Se já tem a cor destino, não faz nada
+  if (original_color == label) {
+    return 0;
+  }
+  
+  // Criar a fila de coordenadas
+  Queue* queue = QueueCreate(img->width * img->height);
+  if (queue == NULL) {
+    return 0;
+  }
+
+  // Criar estrutura para pixel inicial e adicionar à fila
+  PixelCoords start = {u, v};
+  QueueEnqueue(queue, start);
+
+  // Marcar pixel inicial
+  img->image[v][u] = label;
+  int count = 1;
+
+  // Processar fila
+  while (!QueueIsEmpty(queue)) {
+    // Retirar coordenadas da fila
+    PixelCoords curr = QueueDequeue(queue);
+    int curr_u = curr.u;
+    int curr_v = curr.v;
+
+
+    // Verificar e adicionar vizinho DIREITA
+    if (ImageIsValidPixel(img, curr_u + 1, curr_v) && img->image[curr_v][curr_u + 1] == original_color) {
+      img->image[curr_v][curr_u + 1] = label;
+      PixelCoords next = {curr_u + 1, curr_v};
+      QueueEnqueue(queue, next);
+      count++;
+    }
+    
+    // Verificar e adicionar vizinho ESQUERDA
+    if (ImageIsValidPixel(img, curr_u - 1, curr_v) && img->image[curr_v][curr_u - 1] == original_color) {
+      img->image[curr_v][curr_u - 1] = label;
+      PixelCoords next = {curr_u - 1, curr_v};
+      QueueEnqueue(queue, next);
+      count++;
+    }
+      
+    // Verificar e adicionar vizinho BAIXO
+    if (ImageIsValidPixel(img, curr_u, curr_v + 1) && img->image[curr_v + 1][curr_u] == original_color) {
+      img->image[curr_v + 1][curr_u] = label;
+      PixelCoords next = {curr_u, curr_v + 1};
+      QueueEnqueue(queue, next);
+      count++;
+    }
+    
+    // Verificar e adicionar vizinho CIMA
+    if (ImageIsValidPixel(img, curr_u, curr_v - 1) && img->image[curr_v - 1][curr_u] == original_color) {
+      img->image[curr_v - 1][curr_u] = label;
+      PixelCoords next = {curr_u, curr_v - 1};
+      QueueEnqueue(queue, next);
+      count++;
+    }
+  }
+  
+  QueueDestroy(&queue);
 
   return 0;
 }
@@ -804,8 +922,53 @@ int ImageSegmentation(Image img, FillingFunction fillFunct) {
   assert(img != NULL);
   assert(fillFunct != NULL);
 
-  // TO BE COMPLETED
-  // ...
+  int region_count = 0;
+  rgb_t current_color = 0x000000;  // começar com uma cor base
 
-  return 0;
+  // Percorrer todos os pixels da imagem
+  for (uint32 v = 0; v < img->height; v++) {
+    for (uint32 u = 0; u < img->width; u++) {
+      
+      // Se encontrou um pixel de background (WHITE = label 0)
+      if (img->image[v][u] == WHITE) {
+        
+        // Gerar nova cor para esta região
+        current_color = GenerateNextColor(current_color);
+        
+        // Usar LUTAllocColor para obter um label para esta cor
+        // Como é função static, vamos simular o comportamento:
+        // Procurar se a cor já existe na LUT
+        int label = -1;
+        for (uint16 i = 0; i < img->num_colors; i++) {
+          if (img->LUT[i] == current_color) {
+            label = i;
+            break;
+          }
+        }
+        
+        // Se não encontrou, adicionar nova cor à LUT
+        if (label == -1) {
+          if (img->num_colors >= FIXED_LUT_SIZE) {
+            // LUT cheia - usar uma cor existente como fallback
+            label = (region_count % (img->num_colors - 2)) + 2;
+          } else {
+            label = img->num_colors;
+            img->LUT[label] = current_color;
+            img->num_colors++;
+          }
+        }
+
+        // Preencher a região usando a função passada como argumento
+        int pixels_filled = fillFunct(img, u, v, label);
+        
+        if (pixels_filled > 0) {
+          region_count++;
+          printf("Região %d: %d pixels preenchidos com cor 0x%06x (label %d)\n", 
+                 region_count, pixels_filled, current_color, label);
+        }
+      }
+    }
+  }
+  
+  return region_count;
 }

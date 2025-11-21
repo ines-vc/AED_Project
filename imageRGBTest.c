@@ -125,7 +125,7 @@ int main(int argc, char* argv[]) {
   Image result180CW = ImageRotate180CW(image_7);
   ImageSavePBM(result180CW, "feep180CW.pbm");
 
-  printf("12) ImageRegionFillingRecursive - Teste básico\n");
+  printf("12) ImageRegionFillingRecursive\n");
   Image image_8 = ImageLoadPBM("img/feep.pbm");
   ImageRAWPrint(image_8);
   printf("ANTES:\n");
@@ -135,6 +135,40 @@ int main(int argc, char* argv[]) {
   printf("Pixels preenchidos: %d\n", pixels);
   ImageRAWPrint(image_8);
   ImageSavePBM(image_8, "feep_recursive.pbm");
+
+  printf("\n13) ImageRegionFillingWithSTACK - Teste\n");
+  Image image_9 = ImageLoadPBM("img/feep.pbm");  // Carregar de novo
+  printf("ANTES:\n");
+  ImageRAWPrint(image_9);
+  int pixels_stack = ImageRegionFillingWithSTACK(image_9, 0, 0, BLACK);
+  printf("Pixels preenchidos (STACK): %d\n", pixels_stack);
+  printf("DEPOIS:\n");
+  ImageRAWPrint(image_9);
+  ImageSavePBM(image_9, "feep_stack.pbm");
+
+
+  printf("\n14) ImageRegionFillingWithQUEUE\n");
+  Image image_10 = ImageLoadPBM("img/feep.pbm");
+  ImageRAWPrint(image_10);
+
+  // Preencher região WHITE começando em (0, 0) com BLACK
+  int pixels_queue = ImageRegionFillingWithQUEUE(image_10, 0, 0, BLACK);  
+  printf("Pixels preenchidos: %d\n", pixels);
+
+  ImageRAWPrint(image_10);
+  ImageSavePBM(image_10, "feep_queue.pbm");
+
+
+  printf("\n15) ImageSegmentation\n");
+  Image image_11 = ImageLoadPPM("img/feep.ppm");
+  ImageRAWPrint(image_11);
+
+  // Preencher região WHITE começando em (0, 0) com BLACK
+  int pixels_segment = ImageSegmentation(image_11, ImageRegionFillingWithQUEUE);  
+  printf("Pixels preenchidos: %d\n", pixels_segment);
+
+  ImageRAWPrint(image_11);
+  ImageSavePPM(image_11, "feep_segment.ppm");
 
   ImageDestroy(&white_image);
   ImageDestroy(&black_image);
@@ -152,6 +186,9 @@ int main(int argc, char* argv[]) {
   ImageDestroy(&image_6);
   ImageDestroy(&image_7);
   ImageDestroy(&image_8);
+  ImageDestroy(&image_9);
+  ImageDestroy(&image_10);
+  ImageDestroy(&image_11);
 
   test_ImageIsEqual_performance();
 
