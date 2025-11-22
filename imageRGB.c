@@ -284,7 +284,7 @@ void ImageDestroy(Image* imgp) {
 Image ImageCopy(const Image img) {
   assert(img != NULL);
 
-  // Criar uma nova imagem com as mesmas dimenções da imagem original.
+  // Criar uma nova imagem com as mesmas dimensões da imagem original.
   Image copyImg = AllocateImageHeader(img->width, img->height);
 
   // Copia o número de cores utilizadas na LUT (Look-Up Table) para a imagem copiada.
@@ -293,23 +293,15 @@ Image ImageCopy(const Image img) {
   // Copiar toda a LUT da imagem original para a imagem copiada.
   // Como as cores estão no formato LUT (num_colors) cada uma com um valor RGB (rgb_t),
   // temos de multiplicar pelo tamanho de LUT (num_colors).
-  //memcpy(copyImg->LUT, img->LUT, img->num_colors * sizeof(rgb_t));
-
-  for (uint16 c = 0; c < img->num_colors; c++) {
-    copyImg->LUT[c] = img->LUT[c];
-  }
+  memcpy(copyImg->LUT, img->LUT, img->num_colors * sizeof(rgb_t));
 
   // Localizar e copiar linha por linha da imagem.
   for (uint32 i = 0; i < img->height; i++) {
     copyImg->image[i] = AllocateRowArray(img->width);
     memcpy(copyImg->image[i], img->image[i], img->width * sizeof(uint16));
-    
-    for (uint32 j = 0; j < img->width; j++) {
-      copyImg->image[i][j] = img->image[i][j];
-    }
   }
 
-  return copyImg;                                         // Retorna a imagem copiada.
+  return copyImg;                                         // Retornar a imagem copiada.
 }
 
 /// Printing on the console
@@ -581,7 +573,7 @@ int ImageIsEqual(const Image img1, const Image img2) {              //completar
   // Número de comparações realizadas pixel a pixel.
   int comp = 0;
 
-  // Se o comprimento ou a largura de uma imagem for diferente ao outro,
+  // Se a altura ou a largura de uma imagem for diferente à outra,
   // então as imagens não são iguais (return 0).
   if (img1->height != img2->height || img1->width != img2->width) {
     return 0;
@@ -633,24 +625,21 @@ int ImageIsDifferent(const Image img1, const Image img2) {
 Image ImageRotate90CW(const Image img) {                            //completar
   assert(img != NULL);
 
-  // Cria uma nova imagem com as dimensões invertidas(linha passa a coluna e coluna passa a linha).
+  // Criar uma nova imagem com as dimensões invertidas(linha passa a coluna e coluna passa a linha).
   Image img90CW = AllocateImageHeader(img->height, img->width);
 
-  // Copia o número de cores utilizadas na LUT (Look-Up Table) para a imagem copiada.
+  // Copiar o número de cores utilizadas na LUT (Look-Up Table) para a imagem rodada.
   img90CW->num_colors = img->num_colors;
 
-  // Copiar a LUT da imagem original para a imagem rota90Cw.
+  // Copiar a LUT da imagem original para a imagem rodada 90CW.
   // Como as cores estão no formato LUT, temos de multiplicar pelo tamanho de LUT.
-  //memcpy(img90CW->LUT, img->LUT, img->num_colors * sizeof(rgb_t));
-
-  for (uint16 c = 0; c < img->num_colors; c++)
-    img90CW->LUT[c] = img->LUT[c];
+  memcpy(img90CW->LUT, img->LUT, img->num_colors * sizeof(rgb_t));
 
   // Alocar a linha que vai usar.
   for (uint32 i = 0; i < img->width; i++)
         img90CW->image[i] = AllocateRowArray(img90CW->width);
 
-  // O pixel da img(i, j) passa a ser img180CW(j, imgHeight - 1 - i)
+  // O pixel da img(i, j) passa a ser img90CW(j, imgHeight - 1 - i).
   // A primeira linha passa a ser a última coluna.
   for (uint32 i = 0; i < img->height; i++) {
     for (uint32 j = 0; j < img->width; j++) {
@@ -658,7 +647,7 @@ Image ImageRotate90CW(const Image img) {                            //completar
     }
   }
 
-  return img90CW;                  // Retorna a imagem rodada 90 graus.
+  return img90CW;                   // Retorna a imagem rodada 90 graus.
 }
 
 /// Rotate 180 degrees clockwise (CW).
@@ -670,18 +659,15 @@ Image ImageRotate90CW(const Image img) {                            //completar
 Image ImageRotate180CW(const Image img) {                           //completar
   assert(img != NULL);
 
-  //cria uma nova imegem com as mesmas dimenções da imagem original.
+  // Criar uma nova imagem com as mesmas dimensões da imagem original.
   Image img180CW = AllocateImageHeader(img->width, img->height);
 
   // Igualar o número de cores.
   img180CW->num_colors = img->num_colors;
 
-  // Copiar a LUT da imagem original para a imagem rota90Cw.
+  // Copiar a LUT da imagem original para a imagem rodada 180CW.
   // Como as cores estão no formato LUT, temos de multiplicar pelo tamanho de LUT.
-  //memcpy(img180CW->LUT, img->LUT, img->num_colors * sizeof(rgb_t));
-
-  for (uint16 c = 0; c < img->num_colors; c++)
-    img180CW->LUT[c] = img->LUT[c];
+  memcpy(img180CW->LUT, img->LUT, img->num_colors * sizeof(rgb_t));
 
   // Alocar a linha que vai usar.
   for (uint32 i = 0; i < img180CW->height; i++)
@@ -691,7 +677,6 @@ Image ImageRotate180CW(const Image img) {                           //completar
   for (uint32 i = 0; i < img->height; i++) {
     for (uint32 j = 0; j < img->width; j++) {
       img180CW->image[(img->height) - 1 - i][(img->width) - 1 - j] = img->image[i][j];
-      //img180CW->image[i][j] = img->image[(img->height) - 1 - i][(img->width) - 1 - j];
     }
   }
   return img180CW;                  // Retorna a imagem rodada 180 graus.                                                     
@@ -730,7 +715,7 @@ int ImageRegionFillingRecursive(Image img, int u, int v, uint16 label) {
   // Guardar a cor do pixel atual da imagem em original_color.
   uint16 original_color = img->image[v][u];
   
-  // Se a cor do pixel atual (original_color) for igual à que pretendemos mudar(label),
+  // Se a cor do pixel atual (original_color) for igual à que pretendemos mudar (label),
   // não altera a cor (return 0).
   if (original_color == label) {
     return 0;
@@ -738,7 +723,7 @@ int ImageRegionFillingRecursive(Image img, int u, int v, uint16 label) {
   
   // Mudar a cor do pixel atual para a cor pretendida (label).
   img->image[v][u] = label;
-  int count = 1;                  // Incrementa 1 ao número de pixels alterados (labeld pixels).
+  int count = 1;                    // Incrementa 1 ao número de pixels alterados (labeled pixels).
   
   // Percurrer os 4 pixels vizinhos (direita, baixo, cima, esquerda).
 
@@ -746,27 +731,27 @@ int ImageRegionFillingRecursive(Image img, int u, int v, uint16 label) {
   // e se a cor do pixel for igual à cor que queremos alterar (original_color),
   // então muda a cor para a cor pretendida (label) e incrementa 1 ao número de pixels alterados.
 
-  // Deslocar para a direita.
+  // Deslocar para a direita (u+1, v).
   if (ImageIsValidPixel(img, u + 1, v) && img->image[v][u + 1] == original_color) {
     count += ImageRegionFillingRecursive(img, u + 1, v, label);
   }
   
-  // Deslocar para baixo.
+  // Deslocar para baixo (u, v+1).
   if (ImageIsValidPixel(img, u, v + 1) && img->image[v + 1][u] == original_color) {
     count += ImageRegionFillingRecursive(img, u, v + 1, label);
   }
   
-  // Deslocar para cima.
+  // Deslocar para cima (u, v-1).
   if (ImageIsValidPixel(img, u, v - 1) && img->image[v - 1][u] == original_color) {
     count += ImageRegionFillingRecursive(img, u, v - 1, label);
   }
 
-  // Deslocar para a esquerda.
+  // Deslocar para a esquerda (u-1, v).
   if (ImageIsValidPixel(img, u - 1, v) && img->image[v][u - 1] == original_color) {
     count += ImageRegionFillingRecursive(img, u - 1, v, label);
   }
   
-  return count;                                             // Returna o número de pixels alterados.
+  return count;                     // Returnar o número de pixels alterados.
 }
 
 /// Region growing using a STACK of pixel coordinates to
@@ -776,65 +761,69 @@ int ImageRegionFillingWithSTACK(Image img, int u, int v, uint16 label) {
   assert(ImageIsValidPixel(img, u, v));
   assert(label < FIXED_LUT_SIZE);
 
-  // Obter a cor original do pixel semente
+  // Guardar a cor do pixel atual da imagem em original_color.
   uint16 original_color = img->image[v][u];
   
-  // Se já tem a cor destino, não faz nada
+  // Se a cor do pixel atual (original_color) for igual à que pretendemos mudar(label),
+  // não altera a cor (return 0).
   if (original_color == label) {
     return 0;
   }
   
-  // Criar a pilha
-  Stack* stack = StackCreate(100);  // Tamanho inicial
+  // Criar um stack vazio para guardar as coordenadas dos pixels com um tamanho inicial de 100 pixels.
+  Stack* stack = StackCreate(100);
   
-  // Contador de pixels preenchidos
+  // Contar os pixels alterados.
   int count = 0;
   
-  // Adicionar o pixel inicial à pilha
+  // Adicionar o pixel inicial ao stack (stack push).
   StackPush(stack, PixelCoordsCreate(u, v));
   
-  // Remover pixel do topo da pilha enquanto a pilha não estiver vazia
+  // Remover o pixel do topo do stack enquanto não estiver vazio.
   while (!StackIsEmpty(stack)) {
-    PixelCoords current = StackPop(stack);
-    int cu = PixelCoordsGetU(current);
-    int cv = PixelCoordsGetV(current);
+    PixelCoords current = StackPop(stack);            // Remove o pixel.
+    int cu = PixelCoordsGetU(current);                // Obtem a coordenada u do pixel a remover (cu = current u (coluna)).
+    int cv = PixelCoordsGetV(current);                // Obtem a coordenada v do pixel a remover (cv = current v (linha)).
     
-    // Verificar se o pixel é válido e tem a cor original
+    // Se o pixel não for valido, ou seja, se não estiver dentro do limite da imagem 
+    // ou se o pixel atual não tem a cor do pixel original (original_color),
+    // então o pixel é ignorado (continue), ou seja, não é alterado e passa para o próximo pixel do stack.
     if (!ImageIsValidPixel(img, cu, cv) || img->image[cv][cu] != original_color) {
-      continue;  // Ignorar este pixel
+      continue;
     }
     
-    // Preencher o pixel com a nova cor
+    // Mudar a cor do pixel atual para a cor pretendida (label).
     img->image[cv][cu] = label;
-    count++;
+    count++;                                          // Incrementar 1 ao número de pixels alterados (labeld pixels).
     
-    // Adicionar os 4 vizinhos à pilha (DIREITA, ESQUERDA, BAIXO, CIMA)
+    // Percurrer os 4 pixels vizinhos (direita, baixo, cima, esquerda).
+    // Se o pixel for valido, adiciona o pixel atual ao topo do stack.
     
-    // DIREITA (u+1, v)
+    // Deslocar para a direita (u+1, v).
     if (ImageIsValidPixel(img, cu + 1, cv)) {
       StackPush(stack, PixelCoordsCreate(cu + 1, cv));
     }
     
-    // BAIXO (u, v+1)
+    // Deslocar para baixo (u, v+1).
     if (ImageIsValidPixel(img, cu, cv + 1)) {
       StackPush(stack, PixelCoordsCreate(cu, cv + 1));
     }
     
-    // CIMA (u, v-1)
+    // Deslocar para cima (u, v-1).
     if (ImageIsValidPixel(img, cu, cv - 1)) {
       StackPush(stack, PixelCoordsCreate(cu, cv - 1));
     }
 
-    // ESQUERDA (u-1, v)
+    // Deslocar para a esquerda (u-1, v).
     if (ImageIsValidPixel(img, cu - 1, cv)) {
       StackPush(stack, PixelCoordsCreate(cu - 1, cv));
     }
   }
   
-  // Destruir a pilha
+  // Destruir o stack.
   StackDestroy(&stack);
   
-  return count;
+  return count;                // Retornar o número de pixels alterados.
 }
 
 /// Region growing using a QUEUE of pixel coordinates to
@@ -844,53 +833,52 @@ int ImageRegionFillingWithQUEUE(Image img, int u, int v, uint16 label) {
   assert(ImageIsValidPixel(img, u, v));
   assert(label < FIXED_LUT_SIZE);
 
-  // Obter a cor original do pixel semente
+  // Guardar a cor do pixel atual da imagem em original_color.
   uint16 original_color = img->image[v][u];
   
-  // Se já tem a cor destino, não faz nada
+  // Se a cor do pixel atual (original_color) for igual à que pretendemos mudar (label),
+  // não altera a cor (return 0).
   if (original_color == label) {
     return 0;
   }
   
-  // Criar a fila de coordenadas
+  // Criar uma queue vazia para guardar as coordenadas dos pixels com um tamanho inicial igual ao tamanho da imagem.
   Queue* queue = QueueCreate(img->width * img->height);
   if (queue == NULL) {
     return 0;
   }
 
-  // Criar estrutura para pixel inicial e adicionar à fila
+  // Adicionar o pixel inicial à fila.
   PixelCoords start = {u, v};
   QueueEnqueue(queue, start);
 
-  // Marcar pixel inicial
+  // Mudar a cor do pixel atual para a cor pretendida (label).
   img->image[v][u] = label;
-  int count = 1;
+  int count = 1;                                    // Incrementar 1 ao número de pixels alterados (labeld pixels).
 
-  // Processar fila
+  // Remover o pixel do início da queue enquanto não estiver vazia.
   while (!QueueIsEmpty(queue)) {
-    // Retirar coordenadas da fila
-    PixelCoords curr = QueueDequeue(queue);
-    int curr_u = curr.u;
-    int curr_v = curr.v;
+    PixelCoords curr = QueueDequeue(queue);         // Remove o pixel.
+    int curr_u = curr.u;                            // Obtem a coordenada u do pixel a remover (curr_u = current u (coluna)).
+    int curr_v = curr.v;                            // Obtem a coordenada v do pixel a remover (curr_v = current v (linha)).
 
 
-    // Verificar e adicionar vizinho DIREITA
+    // Percurrer os 4 pixels vizinhos (direita, baixo, cima, esquerda).
+
+    // Se o pixel for valido, ou seja, estiver dentro do limite da imagem
+    // e se a cor do pixel for igual à cor que queremos alterar (original_color),
+    // então muda a cor para a cor pretendida (label) e adiciona o pixel no fim da fila
+    // e incrementa 1 ao número de pixels alterados.
+
+    // Verificar e adicionar o vizinho da direita (u+1, v).
     if (ImageIsValidPixel(img, curr_u + 1, curr_v) && img->image[curr_v][curr_u + 1] == original_color) {
       img->image[curr_v][curr_u + 1] = label;
       PixelCoords next = {curr_u + 1, curr_v};
       QueueEnqueue(queue, next);
       count++;
     }
-    
-    // Verificar e adicionar vizinho ESQUERDA
-    if (ImageIsValidPixel(img, curr_u - 1, curr_v) && img->image[curr_v][curr_u - 1] == original_color) {
-      img->image[curr_v][curr_u - 1] = label;
-      PixelCoords next = {curr_u - 1, curr_v};
-      QueueEnqueue(queue, next);
-      count++;
-    }
       
-    // Verificar e adicionar vizinho BAIXO
+    // Verificar e adicionar o vizinho de baixo (u, v+1).
     if (ImageIsValidPixel(img, curr_u, curr_v + 1) && img->image[curr_v + 1][curr_u] == original_color) {
       img->image[curr_v + 1][curr_u] = label;
       PixelCoords next = {curr_u, curr_v + 1};
@@ -898,18 +886,26 @@ int ImageRegionFillingWithQUEUE(Image img, int u, int v, uint16 label) {
       count++;
     }
     
-    // Verificar e adicionar vizinho CIMA
+    // Verificar e adicionar o vizinho de cima (u, v-1).
     if (ImageIsValidPixel(img, curr_u, curr_v - 1) && img->image[curr_v - 1][curr_u] == original_color) {
       img->image[curr_v - 1][curr_u] = label;
       PixelCoords next = {curr_u, curr_v - 1};
       QueueEnqueue(queue, next);
       count++;
     }
+
+    // Verificar e adicionar o vizinho da esquerda (u-1, v).
+    if (ImageIsValidPixel(img, curr_u - 1, curr_v) && img->image[curr_v][curr_u - 1] == original_color) {
+      img->image[curr_v][curr_u - 1] = label;
+      PixelCoords next = {curr_u - 1, curr_v};
+      QueueEnqueue(queue, next);
+      count++;
+    }
   }
   
-  QueueDestroy(&queue);
+  QueueDestroy(&queue);                       // Destruir a queue.
 
-  return 0;
+  return count;                             // Retorna o número de pixels alterados.
 }
 
 /// Image Segmentation
@@ -926,22 +922,21 @@ int ImageSegmentation(Image img, FillingFunction fillFunct) {
   assert(img != NULL);
   assert(fillFunct != NULL);
 
-  int region_count = 0;
-  rgb_t current_color = 0x000000;  // começar com uma cor base
+  int region_count = 0;            // Contador para as regiões encontradas.
+  rgb_t current_color = 0x000000;  // Começar com uma cor base (preto).
 
-  // Percorrer todos os pixels da imagem
+  // Percorrer todos os pixels da imagem.
   for (uint32 v = 0; v < img->height; v++) {
     for (uint32 u = 0; u < img->width; u++) {
       
-      // Se encontrou um pixel de background (WHITE = label 0)
+      // Se encontrar um pixel do background (WHITE).
       if (img->image[v][u] == WHITE) {
         
-        // Gerar nova cor para esta região
+        // Gerar uma cor nova para a região.
         current_color = GenerateNextColor(current_color);
         
-        // Usar LUTAllocColor para obter um label para esta cor
-        // Como é função static, vamos simular o comportamento:
-        // Procurar se a cor já existe na LUT
+        // Usar LUTAllocColor para obter um label para esta cor.
+        // Como é função é static verifica se a cor já existe na LUT.
         int label = -1;
         for (uint16 i = 0; i < img->num_colors; i++) {
           if (img->LUT[i] == current_color) {
@@ -950,11 +945,12 @@ int ImageSegmentation(Image img, FillingFunction fillFunct) {
           }
         }
         
-        // Se não encontrou, adicionar nova cor à LUT
-        if (label == -1) {
+        // Se a cor não existir na LUT.
+        if (label == -1) {    
+          // Se a LUT estiver cheia, reutiliza cores já existentes.  
           if (img->num_colors >= FIXED_LUT_SIZE) {
-            // LUT cheia - usar uma cor existente como fallback
             label = (region_count % (img->num_colors - 2)) + 2;
+          // Senão, adicionar a nova cor à LUT.
           } else {
             label = img->num_colors;
             img->LUT[label] = current_color;
@@ -962,17 +958,16 @@ int ImageSegmentation(Image img, FillingFunction fillFunct) {
           }
         }
 
-        // Preencher a região usando a função passada como argumento
+        // Preencher a região usando uma função anterior.
         int pixels_filled = fillFunct(img, u, v, label);
         
         if (pixels_filled > 0) {
-          region_count++;
-          printf("Região %d: %d pixels preenchidos com cor 0x%06x (label %d)\n", 
-                 region_count, pixels_filled, current_color, label);
+          region_count++;                 // Incrementa o número de regiões encontradas.
+          printf("Região %d: %d pixels preenchidos com cor 0x%06x (label %d)\n", region_count, pixels_filled, current_color, label);
         }
       }
     }
   }
   
-  return region_count;
+  return region_count;                    // Retorna o número de regiões encontradas.
 }
