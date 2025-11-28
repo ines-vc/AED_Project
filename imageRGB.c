@@ -566,7 +566,7 @@ uint16 ImageColors(const Image img) {
 /// Check if img1 and img2 represent equal images.
 /// NOTE: The same rgb color may correspond to different LUT labels in
 /// different images!
-int ImageIsEqual(const Image img1, const Image img2) {              //completar
+int ImageIsEqual(const Image img1, const Image img2) {              
   assert(img1 != NULL);
   assert(img2 != NULL);
 
@@ -576,14 +576,14 @@ int ImageIsEqual(const Image img1, const Image img2) {              //completar
   // Se a altura ou a largura de uma imagem for diferente à outra,
   // então as imagens não são iguais (return 0).
   if (img1->height != img2->height || img1->width != img2->width) {
-    printf("Número de comparações: %d\n", comp);      //apagar
+    printf("Numero de comparacoes: %d\n", comp);      
     return 0;
   }
 
   // Se o número de cores de duas imagens forem diferentes,
   // então as imagens não são iguais (return 0).
   if (img1->num_colors != img2->num_colors) {
-    printf("Número de comparações: %d\n", comp);      //apagar
+    printf("Numero de comparacoes: %d\n", comp);     
     return 0;
   }
 
@@ -598,7 +598,7 @@ int ImageIsEqual(const Image img1, const Image img2) {              //completar
       }
     }
   }
-  printf("Número de comparações: %d\n", comp);      //apagar
+  printf("Numero de comparacoes: %d\n", comp);      
   return 1;                                                                              // Retorna 1 se as imagens forem iguais.
 }
 
@@ -623,7 +623,7 @@ int ImageIsDifferent(const Image img1, const Image img2) {
 ///
 /// On success, a new image is returned.
 /// (The caller is responsible for destroying the returned image!)
-Image ImageRotate90CW(const Image img) {                            //completar
+Image ImageRotate90CW(const Image img) {                            
   assert(img != NULL);
 
   // Criar uma nova imagem com as dimensões invertidas(linha passa a coluna e coluna passa a linha).
@@ -657,7 +657,7 @@ Image ImageRotate90CW(const Image img) {                            //completar
 ///
 /// On success, a new image is returned.
 /// (The caller is responsible for destroying the returned image!)
-Image ImageRotate180CW(const Image img) {                           //completar
+Image ImageRotate180CW(const Image img) {                           
   assert(img != NULL);
 
   // Criar uma nova imagem com as mesmas dimensões da imagem original.
@@ -984,7 +984,7 @@ int ImageSegmentation(Image img, FillingFunction fillFunct) {
         
         if (pixels_filled > 0) {
           region_count++;                 // Incrementa o número de regiões encontradas.
-          printf("Região %d: %d pixels preenchidos com cor 0x%06x (label %d)\n", region_count, pixels_filled, current_color, label);
+          printf("Regiao %d: %d pixels preenchidos com cor 0x%06x (label %d)\n", region_count, pixels_filled, current_color, label);
         }
       }
     }
