@@ -576,12 +576,14 @@ int ImageIsEqual(const Image img1, const Image img2) {              //completar
   // Se a altura ou a largura de uma imagem for diferente à outra,
   // então as imagens não são iguais (return 0).
   if (img1->height != img2->height || img1->width != img2->width) {
+    printf("Número de comparações: %d\n", comp);      //apagar
     return 0;
   }
 
   // Se o número de cores de duas imagens forem diferentes,
   // então as imagens não são iguais (return 0).
   if (img1->num_colors != img2->num_colors) {
+    printf("Número de comparações: %d\n", comp);      //apagar
     return 0;
   }
 
@@ -590,9 +592,8 @@ int ImageIsEqual(const Image img1, const Image img2) {              //completar
   // então não são imagens iguais (return 0).
   for (uint32 i = 0; i < img1->height; i++) {
     for (uint32 j = 0; j < img1->width; j++) {
-      comp ++;                                                                             // Incrementa 1 a cada comparação.
+      comp ++;                                                                       // Incrementa 1 a cada comparação.
       if (img1->LUT[img1->image[i][j]] != img2->LUT[img2->image[i][j]]){                  //  Compara as cores pixel a pixel.
-        printf("Número de comparações: %d\n", comp);      //apagar
         return 0;             
       }
     }
@@ -707,6 +708,9 @@ int ImageIsValidPixel(const Image img, int u, int v) {
 /// Each function carries out a different version of the algorithm.
 
 /// Region growing using the recursive flood-filling algorithm.
+
+InstrReset();  // zera todos os contadores, incluindo PIXMEM
+
 int ImageRegionFillingRecursive(Image img, int u, int v, uint16 label) {
   assert(img != NULL);
   assert(ImageIsValidPixel(img, u, v));
@@ -723,6 +727,7 @@ int ImageRegionFillingRecursive(Image img, int u, int v, uint16 label) {
   
   // Mudar a cor do pixel atual para a cor pretendida (label).
   img->image[v][u] = label;
+  PIXMEM++;                        // Incrementar o contador de acessos à memória de pixels.
   int count = 1;                    // Incrementa 1 ao número de pixels alterados (labeled pixels).
   
   // Percurrer os 4 pixels vizinhos (direita, baixo, cima, esquerda).
@@ -733,21 +738,25 @@ int ImageRegionFillingRecursive(Image img, int u, int v, uint16 label) {
 
   // Deslocar para a direita (u+1, v).
   if (ImageIsValidPixel(img, u + 1, v) && img->image[v][u + 1] == original_color) {
+    PIXMEM++;                    // Incrementar o contador de acessos à memória de pixels.  
     count += ImageRegionFillingRecursive(img, u + 1, v, label);
   }
   
   // Deslocar para baixo (u, v+1).
   if (ImageIsValidPixel(img, u, v + 1) && img->image[v + 1][u] == original_color) {
+    PIXMEM++;                    // Incrementar o contador de acessos à memória de pixels.  
     count += ImageRegionFillingRecursive(img, u, v + 1, label);
   }
   
   // Deslocar para cima (u, v-1).
   if (ImageIsValidPixel(img, u, v - 1) && img->image[v - 1][u] == original_color) {
+    PIXMEM++;                    // Incrementar o contador de acessos à memória de pixels.
     count += ImageRegionFillingRecursive(img, u, v - 1, label);
   }
 
   // Deslocar para a esquerda (u-1, v).
   if (ImageIsValidPixel(img, u - 1, v) && img->image[v][u - 1] == original_color) {
+    PIXMEM++;                    // Incrementar o contador de acessos à memória de pixels.
     count += ImageRegionFillingRecursive(img, u - 1, v, label);
   }
   
@@ -756,6 +765,9 @@ int ImageRegionFillingRecursive(Image img, int u, int v, uint16 label) {
 
 /// Region growing using a STACK of pixel coordinates to
 /// implement the flood-filling algorithm.
+
+InstrReset();  // zera todos os contadores, incluindo PIXMEM
+
 int ImageRegionFillingWithSTACK(Image img, int u, int v, uint16 label) {
   assert(img != NULL);
   assert(ImageIsValidPixel(img, u, v));
@@ -789,11 +801,13 @@ int ImageRegionFillingWithSTACK(Image img, int u, int v, uint16 label) {
     // ou se o pixel atual não tem a cor do pixel original (original_color),
     // então o pixel é ignorado (continue), ou seja, não é alterado e passa para o próximo pixel do stack.
     if (!ImageIsValidPixel(img, cu, cv) || img->image[cv][cu] != original_color) {
+      PIXMEM++;                        // Incrementar o contador de acessos à memória de pixels.
       continue;
     }
     
     // Mudar a cor do pixel atual para a cor pretendida (label).
     img->image[cv][cu] = label;
+    PIXMEM++;                        // Incrementar o contador de acessos à memória de pixels.
     count++;                                          // Incrementar 1 ao número de pixels alterados (labeld pixels).
     
     // Percurrer os 4 pixels vizinhos (direita, baixo, cima, esquerda).
@@ -828,6 +842,9 @@ int ImageRegionFillingWithSTACK(Image img, int u, int v, uint16 label) {
 
 /// Region growing using a QUEUE of pixel coordinates to
 /// implement the flood-filling algorithm.
+
+InstrReset();  // zera todos os contadores, incluindo PIXMEM
+
 int ImageRegionFillingWithQUEUE(Image img, int u, int v, uint16 label) {
   assert(img != NULL);
   assert(ImageIsValidPixel(img, u, v));
@@ -872,6 +889,7 @@ int ImageRegionFillingWithQUEUE(Image img, int u, int v, uint16 label) {
 
     // Verificar e adicionar o vizinho da direita (u+1, v).
     if (ImageIsValidPixel(img, curr_u + 1, curr_v) && img->image[curr_v][curr_u + 1] == original_color) {
+      PIXMEM++;                    // Incrementar o contador de acessos à memória de pixels.
       img->image[curr_v][curr_u + 1] = label;
       PixelCoords next = {curr_u + 1, curr_v};
       QueueEnqueue(queue, next);
@@ -880,6 +898,7 @@ int ImageRegionFillingWithQUEUE(Image img, int u, int v, uint16 label) {
       
     // Verificar e adicionar o vizinho de baixo (u, v+1).
     if (ImageIsValidPixel(img, curr_u, curr_v + 1) && img->image[curr_v + 1][curr_u] == original_color) {
+      PIXMEM++;                    // Incrementar o contador de acessos à memória de pixels.
       img->image[curr_v + 1][curr_u] = label;
       PixelCoords next = {curr_u, curr_v + 1};
       QueueEnqueue(queue, next);
@@ -888,6 +907,7 @@ int ImageRegionFillingWithQUEUE(Image img, int u, int v, uint16 label) {
     
     // Verificar e adicionar o vizinho de cima (u, v-1).
     if (ImageIsValidPixel(img, curr_u, curr_v - 1) && img->image[curr_v - 1][curr_u] == original_color) {
+      PIXMEM++;                    // Incrementar o contador de acessos à memória de pixels.
       img->image[curr_v - 1][curr_u] = label;
       PixelCoords next = {curr_u, curr_v - 1};
       QueueEnqueue(queue, next);
@@ -896,6 +916,7 @@ int ImageRegionFillingWithQUEUE(Image img, int u, int v, uint16 label) {
 
     // Verificar e adicionar o vizinho da esquerda (u-1, v).
     if (ImageIsValidPixel(img, curr_u - 1, curr_v) && img->image[curr_v][curr_u - 1] == original_color) {
+      PIXMEM++;                    // Incrementar o contador de acessos à memória de pixels.
       img->image[curr_v][curr_u - 1] = label;
       PixelCoords next = {curr_u - 1, curr_v};
       QueueEnqueue(queue, next);

@@ -19,46 +19,128 @@
 #include "imageRGB.h"
 #include "instrumentation.h"
 
-void test_ImageIsEqual_performance() {
-    const uint32 WIDTH = 500;
-    const uint32 HEIGHT = 500;
+#define PIXMEM InstrCount[0]
 
-    printf("\n--- Teste de desempenho: ImageIsEqual ---\n");
 
-    // Criar imagens para teste
-    printf("6) ImageLoadPBM\n");
-    Image img1 = ImageLoadPPM("img/feep.ppm");
+void test_RegionFilling_performance() {
+    printf("\n=== TESTE DE DESEMPENHO: Region Filling Functions ===\n");
+
+    // Criar diferentes tamanhos de imagens para teste
+    const uint32 sizes[] = {50, 80, 100};
+    const int num_sizes = 3;
+
+    for (int s = 0; s < num_sizes; s++) {
+        uint32 size = sizes[s];
+        printf("\n--- Testando com imagem %dx%d ---\n", size, size);
+
+        //Teste 1: ImageRegionFillingRecursive
+        printf("\n1) ImageRegionFillingRecursive\n");
+        Image img1 = ImageCreate(size, size);
+        InstrName[0] = "Recursive_Operations";
+        InstrReset();
+        int pixels1 = ImageRegionFillingRecursive(img1, 0, 0, BLACK);
+        InstrPrint();
+        printf("Pixels preenchidos: %d\n", pixels1);
+        ImageDestroy(&img1);
+
+        // Teste 2: ImageRegionFillingWithSTACK
+        printf("\n2) ImageRegionFillingWithSTACK\n");
+        Image img2 = ImageCreate(size, size);
+        InstrName[0] = "Stack_Operations";
+        InstrReset();
+        int pixels2 = ImageRegionFillingWithSTACK(img2, 0, 0, BLACK);
+        InstrPrint();
+        printf("Pixels preenchidos: %d\n", pixels2);
+        ImageDestroy(&img2);
+
+        // Teste 3: ImageRegionFillingWithQUEUE
+        printf("\n3) ImageRegionFillingWithQUEUE\n");
+        Image img3 = ImageCreate(size, size);
+        InstrName[0] = "Queue_Operations";
+        InstrReset();
+        int pixels3 = ImageRegionFillingWithQUEUE(img3, 0, 0, BLACK);
+        InstrPrint();
+        printf("Pixels preenchidos: %d\n", pixels3);
+        ImageDestroy(&img3);
+
+        printf("\n" "========================================\n");
+    }
+
+    // Teste com imagem mais complexa (padrão xadrez)
+    printf("\n--- Testando com padrão xadrez complexo ---\n");
     
+    Image chess = ImageCreateChess(100, 100, 10, 0x000000);
     
-
-    printf("7) ImageLoadPPM\n");
-    Image img2 = ImageLoadPPM("img/feep.ppm");
-    
-
-
-    Image img3 = ImageCreate(WIDTH, HEIGHT);
-  
-    // Nomear o contador de pixels comparados
-    InstrName[0] = "Pixel_Comparisons";
-
-    // --- Teste 1: Imagens idênticas ---
-    printf("\nTeste 1 (idênticas)\n");
+    printf("\n1) Recursive - Padrão xadrez\n");
+    Image chess1 = ImageCopy(chess);
+    InstrName[0] = "Recursive_Chess";
     InstrReset();
-    int equal1 = ImageIsEqual(img1, img2);
+    int pixels_chess1 = ImageRegionFillingRecursive(chess1, 5, 5, BLACK);
     InstrPrint();
-    printf("Resultado: %s\n", equal1 ? "Igual" : "Diferente");
+    printf("Pixels preenchidos: %d\n", pixels_chess1);
+    ImageSavePPM(chess1, "chess_recursive_test.ppm");
+    ImageDestroy(&chess1);
 
-    // --- Teste 2: Imagens diferentes ---
-    printf("\nTeste 2 (diferentes)\n");
+    printf("\n2) Stack - Padrão xadrez\n");
+    Image chess2 = ImageCopy(chess);
+    InstrName[0] = "Stack_Chess";
     InstrReset();
-    int equal2 = ImageIsEqual(img1, img3);
+    int pixels_chess2 = ImageRegionFillingWithSTACK(chess2, 5, 5, BLACK);
     InstrPrint();
-    printf("Resultado: %s\n", equal2 ? "Igual" : "Diferente");
+    printf("Pixels preenchidos: %d\n", pixels_chess2);
+    ImageSavePPM(chess2, "chess_stack_test.ppm");
+    ImageDestroy(&chess2);
 
-    // Limpeza de memória
-    ImageDestroy(&img1);
-    ImageDestroy(&img2);
-    ImageDestroy(&img3);
+    printf("\n3) Queue - Padrão xadrez\n");
+    Image chess3 = ImageCopy(chess);
+    InstrName[0] = "Queue_Chess";
+    InstrReset();
+    int pixels_chess3 = ImageRegionFillingWithQUEUE(chess3, 5, 5, BLACK);
+    InstrPrint();
+    printf("Pixels preenchidos: %d\n", pixels_chess3);
+    ImageSavePPM(chess3, "chess_queue_test.ppm");
+    ImageDestroy(&chess3);
+
+    ImageDestroy(&chess);
+
+    // Teste de Segmentação
+    printf("\n--- Teste de ImageSegmentation ---\n");
+    
+    Image seg_img = ImageCreateChess(80, 80, 20, 0x000000);
+    
+    printf("\n1) Segmentação com Recursive\n");
+    Image seg1 = ImageCopy(seg_img);
+    InstrName[0] = "Segmentation_Recursive";
+    InstrReset();
+    int regions1 = ImageSegmentation(seg1, ImageRegionFillingRecursive);
+    InstrPrint();
+    printf("Regiões encontradas: %d\n", regions1);
+    ImageSavePPM(seg1, "segment_recursive_test.ppm");
+    ImageDestroy(&seg1);
+
+    printf("\n2) Segmentação com Stack\n");
+    Image seg2 = ImageCopy(seg_img);
+    InstrName[0] = "Segmentation_Stack";
+    InstrReset();
+    int regions2 = ImageSegmentation(seg2, ImageRegionFillingWithSTACK);
+    InstrPrint();
+    printf("Regiões encontradas: %d\n", regions2);
+    ImageSavePPM(seg2, "segment_stack_test.ppm");
+    ImageDestroy(&seg2);
+
+    printf("\n3) Segmentação com Queue\n");
+    Image seg3 = ImageCopy(seg_img);
+    InstrName[0] = "Segmentation_Queue";
+    InstrReset();
+    int regions3 = ImageSegmentation(seg3, ImageRegionFillingWithQUEUE);
+    InstrPrint();
+    printf("Regiões encontradas: %d\n", regions3);
+    ImageSavePPM(seg3, "segment_queue_test.ppm");
+    ImageDestroy(&seg3);
+
+    ImageDestroy(&seg_img);
+
+    printf("\n=== FIM DOS TESTES DE DESEMPENHO ===\n");
 }
 
 int main(int argc, char* argv[]) {
@@ -110,8 +192,8 @@ int main(int argc, char* argv[]) {
   ImageSavePPM(image_3, "palete.ppm");
   
   printf("9) ImageIsEqual\n");
-  Image image_4 = ImageLoadPPM("img/feep.ppm");
-  Image image_5 = ImageLoadPBM("img/feep.pbm");
+  Image image_4 = ImageLoadPBM("img/feep.pbm");
+  Image image_5 = ImageLoadPPM("chess_image_2.ppm");
   int result = ImageIsEqual(image_4, image_5);
   printf("Resultado = %d\n", result);
 
@@ -130,9 +212,17 @@ int main(int argc, char* argv[]) {
   ImageRAWPrint(image_8);
   printf("ANTES:\n");
   ImageRAWPrint(image_8);
+
+  // Reset contador PIXMEM antes da função
+  InstrReset();
+  int pixels4 = ImageRegionFillingRecursive(image_8, 0, 0, BLACK);
+
+  printf("Pixels preenchidos (Recursive): %d\n", pixels4);
+  printf("PIXMEM (acessos a pixels): %llu\n", PIXMEM);
+
   // Preencher região WHITE começando em (2, 2) com BLACK
-  int pixels = ImageRegionFillingRecursive(image_8, 0, 0, BLACK);  
-  printf("Pixels preenchidos: %d\n", pixels);
+  int pixels4 = ImageRegionFillingRecursive(image_8, 0, 0, BLACK);  
+  printf("Pixels preenchidos: %d\n", pixels4);
   ImageRAWPrint(image_8);
   ImageSavePBM(image_8, "feep_recursive.pbm");
 
@@ -140,6 +230,14 @@ int main(int argc, char* argv[]) {
   Image image_9 = ImageLoadPBM("img/feep.pbm");  // Carregar de novo
   printf("ANTES:\n");
   ImageRAWPrint(image_9);
+
+  // Reset contador PIXMEM antes da função
+  InstrReset();
+  int pixels_stack = ImageRegionFillingWithSTACK(image_9, 0, 0, BLACK);
+
+  printf("Pixels preenchidos (STACK): %d\n", pixels_stack); 
+  printf("PIXMEM (acessos a pixels): %llu\n", PIXMEM);
+
   int pixels_stack = ImageRegionFillingWithSTACK(image_9, 0, 0, BLACK);
   printf("Pixels preenchidos (STACK): %d\n", pixels_stack);
   printf("DEPOIS:\n");
@@ -151,9 +249,16 @@ int main(int argc, char* argv[]) {
   Image image_10 = ImageLoadPBM("img/feep.pbm");
   ImageRAWPrint(image_10);
 
+  // Reset contador PIXMEM antes da função
+  InstrReset();
+  int pixels_queue = ImageRegionFillingWithQUEUE(image_10, 0, 0, BLACK);
+
+  printf("Pixels preenchidos (QUEUE): %d\n", pixels_queue);
+  printf("PIXMEM (acessos a pixels): %llu\n", PIXMEM);
+
   // Preencher região WHITE começando em (0, 0) com BLACK
   int pixels_queue = ImageRegionFillingWithQUEUE(image_10, 0, 0, BLACK);  
-  printf("Pixels preenchidos: %d\n", pixels);
+  printf("Pixels preenchidos: %d\n", pixels_queue);
 
   ImageRAWPrint(image_10);
   ImageSavePBM(image_10, "feep_queue.pbm");
@@ -190,7 +295,8 @@ int main(int argc, char* argv[]) {
   ImageDestroy(&image_10);
   ImageDestroy(&image_11);
 
-  test_ImageIsEqual_performance();
+  test_RegionFilling_performance();
+
 
   return 0;
 }
