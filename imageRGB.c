@@ -51,7 +51,7 @@
 struct image {
   uint32 width;
   uint32 height;
-  uint16** image;     // pointer to an array of pointers referencing the image rows
+  uint16** image;  // pointer to an array of pointers referencing the image rows
   uint16 num_colors;  // the number of colors (i.e., pixel labels) used
   rgb_t* LUT;         // table storing (R,G,B) triplets
 };
@@ -708,9 +708,6 @@ int ImageIsValidPixel(const Image img, int u, int v) {
 /// Each function carries out a different version of the algorithm.
 
 /// Region growing using the recursive flood-filling algorithm.
-
-InstrReset();  // zera todos os contadores, incluindo PIXMEM
-
 int ImageRegionFillingRecursive(Image img, int u, int v, uint16 label) {
   assert(img != NULL);
   assert(ImageIsValidPixel(img, u, v));
@@ -765,13 +762,12 @@ int ImageRegionFillingRecursive(Image img, int u, int v, uint16 label) {
 
 /// Region growing using a STACK of pixel coordinates to
 /// implement the flood-filling algorithm.
-
-InstrReset();  // zera todos os contadores, incluindo PIXMEM
-
 int ImageRegionFillingWithSTACK(Image img, int u, int v, uint16 label) {
   assert(img != NULL);
   assert(ImageIsValidPixel(img, u, v));
   assert(label < FIXED_LUT_SIZE);
+
+  PIXMEM = 0;                         // Zera o contador de acessos à memória de pixels.
 
   // Guardar a cor do pixel atual da imagem em original_color.
   uint16 original_color = img->image[v][u];
@@ -842,13 +838,12 @@ int ImageRegionFillingWithSTACK(Image img, int u, int v, uint16 label) {
 
 /// Region growing using a QUEUE of pixel coordinates to
 /// implement the flood-filling algorithm.
-
-InstrReset();  // zera todos os contadores, incluindo PIXMEM
-
 int ImageRegionFillingWithQUEUE(Image img, int u, int v, uint16 label) {
   assert(img != NULL);
   assert(ImageIsValidPixel(img, u, v));
   assert(label < FIXED_LUT_SIZE);
+
+  PIXMEM = 0;                         // Zera o contador de acessos à memória de pixels.
 
   // Guardar a cor do pixel atual da imagem em original_color.
   uint16 original_color = img->image[v][u];
@@ -878,7 +873,6 @@ int ImageRegionFillingWithQUEUE(Image img, int u, int v, uint16 label) {
     PixelCoords curr = QueueDequeue(queue);         // Remove o pixel.
     int curr_u = curr.u;                            // Obtem a coordenada u do pixel a remover (curr_u = current u (coluna)).
     int curr_v = curr.v;                            // Obtem a coordenada v do pixel a remover (curr_v = current v (linha)).
-
 
     // Percurrer os 4 pixels vizinhos (direita, baixo, cima, esquerda).
 
